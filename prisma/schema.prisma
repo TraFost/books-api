@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+                      // @id is a directive that marks the field as the primary key
+  id        String   @id @default(cuid()) // @default(cuid()) is a function that generates a unique ID, its another way to generate an id without using autoincrement
+  email     String   @unique // @unique is a constraint that makes sure that the email is unique, so no two users can have the same email
+  name      String?  // ? means that the field is optional
+  password  String
+  books    Book[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  books     Book[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Book {
+  id            String   @id @default(cuid())
+  title         String
+  author        String
+  description   String                                                 // @relation is a directive that defines a relation between a model and another model
+  user          User     @relation(fields: [userId], references: [id]) // fields and references are arrays that define the relation between the two models
+  userId        String // << foreign key, this is referencing the id field in the User model. in syntax above it gets the id from the user model and references it here
+  categories    Category[]
+  createdAt     DateTime @default(now()) // @default(now()) is a function that sets the field to the current date and time
+  updatedAt     DateTime @updatedAt     // @updatedAt is a directive that sets the field to the current date and time whenever the record is updated
+}
