@@ -16,7 +16,7 @@ datasource db {
 model User {
                       // @id is a directive that marks the field as the primary key
   id        String   @id @default(cuid()) // @default(cuid()) is a function that generates a unique ID, its another way to generate an id without using autoincrement
-  email     String   @unique // @unique is a constraint that makes sure that the email is unique, so no two users can have the same email
+  username  String   @unique // @unique is a directive that marks the field as unique
   name      String?  // ? means that the field is optional
   password  String
   books    Book[]
