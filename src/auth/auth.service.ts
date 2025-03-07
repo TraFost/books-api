@@ -5,6 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { hash, compare } from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
@@ -12,14 +13,17 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
 
   async getHello() {
     return 'Please access /auth/register or /auth/login to register or login';
   }
 
   async register(dto: RegisterDto) {
-    const { password, username } = dto;
+    const { password, username, name } = dto;
 
     const existingUser = await this.prisma.user.findUnique({
       where: { username: username },
@@ -33,6 +37,7 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
+        name,
         username,
         password: hashedPassword,
       },
@@ -66,9 +71,10 @@ export class AuthService {
 
     const { password: _, ...result } = user;
 
+    const token = this.jwtService.sign(user);
+
     return {
-      user: result,
-      token: 'fake token',
+      user: { ...result, token },
       message: 'Login successful',
       statusCode: HttpStatus.OK,
     };
